@@ -26,7 +26,7 @@ if __name__ == "__main__":
     assert len(args.tickers) == len(args.abbrs), "Tickers와 abbrs의 개수가 같아야 합니다."
     assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다."
     assert len(args.abbrs) == len(set(args.abbrs)), "각 종목은 각각 다른 알파벳으로 표현해야 합니다."
-    assert all(len(abbr) == 1 for abbr in args.must_include), "must_include는 abbreviation으로 주어져야 합니다."
+    assert args.must_include is None or all(len(abbr) == 1 for abbr in args.must_include), "must_include는 abbreviation으로 주어져야 합니다."
     assert args.must_include is None or all(abbr in args.abbrs for abbr in args.must_include), "must_include에 포함된 종목들은 abbrs 안에 정의돼있어야 합니다."
     
     if not os.path.exists(args.save_path):
