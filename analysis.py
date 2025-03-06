@@ -68,9 +68,7 @@ def get_mixed_data(stock_info: list[pd.DataFrame], abbrs: list[str], ratio: list
         abbrs (list[str]): 각 종목을 대표할 알파벳 1개
         ratio (list[float]): 합칠 비율 (소수점)
     """
-    assert len(stock_info) == len(ratio) and len(ratio) == len(abbrs), "Tickers와 ratio와 abbrs의 개수가 같아야 합니다."
     assert abs(sum(ratio) - 1) < 1e-6, "Ratio의 합은 1이어야 합니다."
-    assert all(len(abbr) == 1 for abbr in abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다"
     
     # 합친 종목 코드 생성 (e.g. S8Q2)
     rounded_ratios = [round(r * 10) for r in ratio]

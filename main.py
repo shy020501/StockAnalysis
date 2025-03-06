@@ -18,6 +18,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    assert len(args.tickers) == len(args.abbrs), "Tickers와 abbrs의 개수가 같아야 합니다."
+    assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다"
+    
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
     
