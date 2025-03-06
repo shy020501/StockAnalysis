@@ -1,24 +1,33 @@
 import os
 import numpy as np
 import argparse
+import yfinance as yf
 
 from analysis import *
 from utils import *
 
-AVAIL_ANALYSIS = ["avg_return_volatility"]
+AVAIL_ANALYSIS = ["avg_return_volatility", "long_term_investment"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ETF Analysis Script")
     
-    parser.add_argument("--analysis", type=str, required=True, help="Type of analysis to perform")
-    parser.add_argument("--tickers", type=lambda s: s.split(' '), default=["SCHD", "SPY", "QQQ"],
+    available_methods = ", ".join(method for method in AVAIL_ANALYSIS)
+    parser.add_argument("--analysis", type=str, required=True, help=f"Type of analysis to perform: {available_methods}")
+    parser.add_argument("--tickers", type=lambda s: s.split(' '), required=True,
                         help="Whitespace-separated list of ETF tickers (default: SCHD SPY QQQ)")
-    parser.add_argument("--abbrs", type=lambda s: s.split(' '), default=["S", "P", "Q"],
+    parser.add_argument("--save_path", type=str, default="./output", help="Directory to save results")
+    
+    # avg_return_volatility 전용
+    parser.add_argument("--downward_only", action="store_true", help="Get downward value only (default: False)")
+    parser.add_argument("--abbrs", type=lambda s: s.split(' '), default=None,
                         help="Whitespace-separated list of abbreviation of ETF tickers (default: S P Q)")
     parser.add_argument("--must_include", type=lambda s: s.split(' '), default=None,
                         help="Whitespace-separated list of abbreviation of ETF that must be included in combination (default: None)")
-    parser.add_argument("--downward_only", action="store_true", help="Get downward value only (default: False)")
-    parser.add_argument("--save_path", type=str, default="./output", help="Directory to save results")
+    
+    # long_term_investment 전용
+    parser.add_argument("--min_year", type=int, default=2, help="Minimum years of investment")
+    parser.add_argument("--max_year", type=int, default=10, help="Maximum years of investment")
+    parser.add_argument("--interval", type=int, default=2, help="Interval of years to investigate effect of long-term investment")
     
     args = parser.parse_args()
     
@@ -26,8 +35,14 @@ if __name__ == "__main__":
     
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
-    
+        
     if args.analysis == "avg_return_volatility":
+        assert len(args.tickers) == len(args.abbrs), "Tickers와 abbrs의 개수가 같아야 합니다."
+        assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다."
+        assert len(args.abbrs) == len(set(args.abbrs)), "각 종목은 각각 다른 알파벳으로 표현해야 합니다."
+        assert args.must_include is None or all(len(abbr) == 1 for abbr in args.must_include), "must_include는 abbreviation으로 주어져야 합니다."
+        assert args.must_include is None or all(abbr in args.abbrs for abbr in args.must_include), "must_include에 포함된 종목들은 abbrs 안에 정의돼있어야 합니다."
+        
         save_dir = f"{args.save_path}/avg_return_volatility/"
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -46,7 +61,7 @@ if __name__ == "__main__":
                 ratios = [[r, 1 - r] for r in ratio_interval]
                 
                 for ratio in ratios:
-                    weighted_return, combined_ticker = get_mixed_data(stock_comb, abbr_comb, ratio)
+                    weighted_return, combined_ticker = get_mixed_data(stock_comb, ratio, abbr_comb)
                     _, avg_return = get_annual_return(weighted_return)
                     _, avg_volatility = get_annual_volatility(weighted_return, args.downward_only)
                     
@@ -87,4 +102,64 @@ if __name__ == "__main__":
         plt.ylabel("Average Annual Return (%)")
         plt.title(f"Start date : {latest_start_date}")
         plt.grid(True, linestyle='--', alpha=0.7)
+        plt.savefig(f"{save_dir}/{file_name}.png")
+
+    if args.analysis == "long_term_investment":
+        assert len(args.tickers) == 1, "여러 종목으로 이루어진 포트폴리오에 대한 수익률을 원하는 경우는 README를 참고하여 하나의 string으로 작성 바랍니다."
+        
+        save_dir = f"{args.save_path}/long_term_investment/"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            
+        portfolio = parse_string_digit_pairs(args.tickers[0])
+        
+        if len(portfolio) > 1:
+            tickers, ratios = zip(*portfolio)
+            
+            tickers = list(tickers)
+            ratios = list(ratios)
+            
+            stock_info, latest_start_date = get_multiple_stock_info(tickers)
+            daily_return, _ = get_mixed_data(stock_info, ratios, None)
+        else:
+            ticker = portfolio[0][0]
+            df = yf.download(ticker, period="max", interval="1d", auto_adjust=False)
+            daily_return = df['Adj Close'].pct_change().dropna()
+            latest_start_date = df.index.min().date()
+            
+        invest_years = list(range(args.min_year, args.max_year+1, args.interval))
+        if invest_years[-1] != args.max_year:
+            invest_years.append(args.max_year)
+            
+        fig, axes = plt.subplots(nrows=len(invest_years), figsize=(10, len(invest_years) * 5))  # 개수만큼 세로 배치
+
+        plt.rc('font', family='Malgun Gothic')
+        plt.rcParams['axes.unicode_minus'] = False
+        
+        for ax, invest_year in zip(axes, invest_years):
+            sampled_returns = sample_random_returns(daily_return, invest_year, 500)
+            
+            print(f"min : {min(sampled_returns)} | max : {max(sampled_returns)}")
+            
+            max_bins = 25
+            bins = np.arange(min(sampled_returns) // 10 * 10, max(sampled_returns) // 10 * 10 + 11, 10)
+            if len(bins) > max_bins:
+                bins = np.arange(min(sampled_returns) // 25 * 25, max(sampled_returns) // 25 * 25 + 26, 25)
+
+            counts, edges = np.histogram(sampled_returns, bins=bins)
+
+            ax.bar(edges[:-1], counts, width=5, edgecolor="black", align="edge")
+            ax.set_xlabel("Cumulative Return (%)")
+            ax.set_ylabel("Num samples")
+            ax.set_title(f"Cumulative return of {invest_year}-year investment")
+            ax.set_xticks(edges)
+            ax.grid(axis="y", linestyle="--", alpha=0.7)
+        
+        if len(portfolio) > 1:
+            rounded_ratios = [round(r * 10) for r in ratios]
+            file_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
+        else:
+            file_name = ticker
+            
+        plt.tight_layout()
         plt.savefig(f"{save_dir}/{file_name}.png")
