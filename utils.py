@@ -62,6 +62,6 @@ def parse_string_digit_pairs(s: str):
         return None  # 형식이 올바르지 않으면 None 반환
     
     matches = re.findall(r'([A-Za-z]+)(\d*)', s)
-    parsed_result = [(text, float(num / 10) if num else None) for text, num in matches]
+    parsed_result = [(text, float(num) / 10 if num else None) for text, num in matches]
     
     return parsed_result
