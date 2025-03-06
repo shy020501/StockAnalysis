@@ -5,6 +5,8 @@ import argparse
 from analysis import *
 from utils import *
 
+AVAIL_ANALYSIS = ["avg_return_volatility"]
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ETF Analysis Script")
     
@@ -20,6 +22,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    assert args.analysis in AVAIL_ANALYSIS, f"{args.analysis}은 가능한 분석 목록에 없습니다."
     assert len(args.tickers) == len(args.abbrs), "Tickers와 abbrs의 개수가 같아야 합니다."
     assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다."
     assert len(args.abbrs) == len(set(args.abbrs)), "각 종목은 각각 다른 알파벳으로 표현해야 합니다."
