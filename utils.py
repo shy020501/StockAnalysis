@@ -1,5 +1,6 @@
 import itertools
 import pandas as pd
+import re
 
 COLORS = ["red", "blue", "green", "yellow", "purple", "orange", "cyan", "magenta", "brown", "pink"]
 
@@ -47,3 +48,20 @@ def assign_color(tickers: list[str]) -> dict:
     return color_map
 
 
+def parse_string_digit_pairs(s: str):
+    """
+    주어진 문자열이 {str}{digit}{string}{digit}... 형태인지 확인하고,
+    올바른 형식이면 [(str, digit), (str, digit), ...] 형태로 변환하여 반환.
+    
+    Args:
+        s (str): 패턴을 확인할 문자열
+    """
+    pattern = r'^([A-Za-z]+(?:\d+[A-Za-z]+)*\d*)$'
+    
+    if not re.fullmatch(pattern, s):
+        return None  # 형식이 올바르지 않으면 None 반환
+    
+    matches = re.findall(r'([A-Za-z]+)(\d*)', s)
+    parsed_result = [(text, float(num / 10) if num else None) for text, num in matches]
+    
+    return parsed_result
