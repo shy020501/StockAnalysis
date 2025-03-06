@@ -139,8 +139,6 @@ if __name__ == "__main__":
         for ax, invest_year in zip(axes, invest_years):
             sampled_returns = sample_random_returns(daily_return, invest_year, 500)
             
-            print(f"min : {min(sampled_returns)} | max : {max(sampled_returns)}")
-            
             max_bins = 25
             bins = np.arange(min(sampled_returns) // 10 * 10, max(sampled_returns) // 10 * 10 + 11, 10)
             if len(bins) > max_bins:
