@@ -13,13 +13,18 @@ if __name__ == "__main__":
                         help="Whitespace-separated list of ETF tickers (default: SCHD SPY QQQ)")
     parser.add_argument("--abbrs", type=lambda s: s.split(' '), default=["S", "P", "Q"],
                         help="Whitespace-separated list of abbreviation of ETF tickers (default: S P Q)")
+    parser.add_argument("--must_include", type=lambda s: s.split(' '), default=None,
+                        help="Whitespace-separated list of abbreviation of ETF that must be included in combination (default: None)")
     parser.add_argument("--downward_only", action="store_true", help="Get downward value only (default: False)")
     parser.add_argument("--save_path", type=str, default="./output", help="Directory to save results")
     
     args = parser.parse_args()
     
     assert len(args.tickers) == len(args.abbrs), "Tickers와 abbrs의 개수가 같아야 합니다."
-    assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다"
+    assert all(len(abbr) == 1 for abbr in args.abbrs), "각 종목은 1개의 알파벳으로 표현해야 합니다."
+    assert len(args.abbrs) == len(set(args.abbrs)), "각 종목은 각각 다른 알파벳으로 표현해야 합니다."
+    assert all(len(abbr) == 1 for abbr in args.must_include), "must_include는 abbreviation으로 주어져야 합니다."
+    assert args.must_include is None or all(abbr in args.abbrs for abbr in args.must_include), "must_include에 포함된 종목들은 abbrs 안에 정의돼있어야 합니다."
     
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
@@ -33,7 +38,7 @@ if __name__ == "__main__":
         
         if len(args.tickers) > 1:
             stock_info, latest_start_date = get_multiple_stock_info(args.tickers)
-            paired_stock_info, paired_abbrs = stock_combination(stock_info, args.abbrs, 2)
+            paired_stock_info, paired_abbrs = stock_combination(stock_info, args.abbrs, 2, args.must_include)
             
             for stock_comb, abbr_comb in zip(paired_stock_info, paired_abbrs):
                 stock_comb = list(stock_comb)
@@ -75,6 +80,9 @@ if __name__ == "__main__":
         
         if args.downward_only:
             file_name += "-downward_only"
+        if args.must_include is not None:
+            file_name += "-must_include-"
+            file_name += "-".join([ticker for ticker in args.must_include])
         
         plt.xlabel(x_label)
         plt.ylabel("Average Annual Return (%)")
