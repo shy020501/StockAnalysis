@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--min_year", type=int, default=2, help="Minimum years of investment")
     parser.add_argument("--max_year", type=int, default=10, help="Maximum years of investment")
     parser.add_argument("--interval", type=int, default=2, help="Interval of years to investigate effect of long-term investment")
+    parser.add_argument("--num_samples", type=int, default=500, help="Number of samples")
     
     args = parser.parse_args()
     
@@ -137,7 +138,7 @@ if __name__ == "__main__":
         plt.rcParams['axes.unicode_minus'] = False
         
         for ax, invest_year in zip(axes, invest_years):
-            sampled_returns = sample_random_returns(daily_return, invest_year, 500)
+            sampled_returns = sample_random_returns(daily_return, invest_year, args.num_samples)
             
             max_bins = 25
             bins = np.arange(min(sampled_returns) // 10 * 10, max(sampled_returns) // 10 * 10 + 11, 10)
