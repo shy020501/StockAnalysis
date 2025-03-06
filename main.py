@@ -58,6 +58,7 @@ if __name__ == "__main__":
                     analysed_info[combined_ticker] = (avg_return, avg_volatility)
         else:
             stock_info = [yf.download(args.tickers[0], period="max", interval="1d", auto_adjust=False)]
+            latest_start_date = stock_info[0].index.min().date()
                     
         for i in range(len(args.tickers)):
             daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
