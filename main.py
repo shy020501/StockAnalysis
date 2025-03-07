@@ -51,7 +51,7 @@ if __name__ == "__main__":
         analysed_info = {}
         
         if len(args.tickers) > 1:
-            stock_info, latest_start_date = get_multiple_stock_info(args.tickers)
+            stock_info = get_multiple_stock_info(args.tickers)
             paired_stock_info, paired_abbrs = stock_combination(stock_info, args.abbrs, 2, args.must_include)
             
             for stock_comb, abbr_comb in zip(paired_stock_info, paired_abbrs):
@@ -69,7 +69,6 @@ if __name__ == "__main__":
                     analysed_info[combined_ticker] = (avg_return, avg_volatility)
         else:
             stock_info = [yf.download(args.tickers[0], period="max", interval="1d", auto_adjust=False)]
-            latest_start_date = stock_info[0].index.min().date()
                     
         for i in range(len(args.tickers)):
             daily_return = stock_info[i]['Adj Close'].pct_change().dropna()

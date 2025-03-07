@@ -100,7 +100,7 @@ def get_multiple_stock_info(tickers: list[str]) -> list[pd.DataFrame]:
     latest_start_date = max(start_dates)
     filtered_data_list = [df[df.index >= latest_start_date] for df in data_list]
 
-    return filtered_data_list, latest_start_date.date()
+    return filtered_data_list
 
 def sample_random_returns(daily_return: pd.DataFrame, invest_year: int, sample_num: int) -> list[float]:
     """
