@@ -19,12 +19,12 @@ pip install -r requirements.txt
 |------------------|-------------|----------------------------------------------------|----------------|--------------------------------|
 | `--analysis`     | `str`       | 사용할 분석 방식 (가능한 분석은 아래 참고)            | True           | `avg_return_volatility`        |
 | `--tickers`      | `str`       | 분석할 종목 코드(들)                                 | True          | `"SCHD QQQ TLT"`, `"SCHD8QQQ2"` |
-| `--save_dir`     | `str`       | 저장할 디렉토리 (default: output)                    | False          | `./output`                    |
+| `--save_path`    | `str`       | 저장할 디렉토리 (default: output)                    | False          | `./output`                    |
 
 <br>
 
 ```bash
-python main.py --analysis <분석 방법> --tickers <종목 코드> --save_dir <저장 위치> # 그 외 분석에 필요한 arguments
+python main.py --analysis <분석 방법> --tickers <종목 코드> --save_path <저장 위치> # 그 외 분석에 필요한 arguments
 ```
 
 <br>
@@ -48,7 +48,7 @@ python main.py --analysis <분석 방법> --tickers <종목 코드> --save_dir <
 
 ### Example
 ```bash
-python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abbrs "S Q T" --downward_only --save_dir "./output"
+python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abbrs "S Q T" --downward_only --save_path "./output"
 ```
 
 ### Output
@@ -71,7 +71,7 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 
 ### Example
 ```bash
-python main.py --analysis "long_term_investment" --tickers "QQQ" --save_dir "./output"
+python main.py --analysis "long_term_investment" --tickers "QQQ" --save_path "./output"
 ```
 
 ### Output
