@@ -153,10 +153,7 @@ if __name__ == "__main__":
         for ax, invest_year in zip(axes, invest_years):
             sampled_returns = sample_random_returns(daily_return, invest_year, args.num_samples)
             
-            max_bins = 25
-            bins = np.arange(min(sampled_returns) // 10 * 10, max(sampled_returns) // 10 * 10 + 11, 10)
-            if len(bins) > max_bins:
-                bins = np.arange(min(sampled_returns) // 25 * 25, max(sampled_returns) // 25 * 25 + 26, 25)
+            bins = np.arange(min(sampled_returns) // 5 * 5, max(sampled_returns) // 5 * 5 + 6, 5) # 5% 단위로 수익률 계산
 
             counts, edges = np.histogram(sampled_returns, bins=bins)
 
