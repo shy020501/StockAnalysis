@@ -163,7 +163,7 @@ if __name__ == "__main__":
             ax.bar(edges[:-1], counts, width=5, edgecolor="black", align="edge")
             ax.set_xlabel("Average Annual Return (%)")
             ax.set_ylabel("Num Samples")
-            ax.set_title(f"Average annual of {invest_year}-year investment")
+            ax.set_title(f"Distribution of annual return of {invest_year}-year investment")
             ax.set_xticks(edges)
             ax.grid(axis="y", linestyle="--", alpha=0.7)
             
