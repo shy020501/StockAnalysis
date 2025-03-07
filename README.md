@@ -9,7 +9,7 @@ pip install -r requirements.txt
 ```
 
 # Run Analysis
-⚠️ Tickers, abbrs 등 여러 종목을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
+⚠️ Tickers, abbrs 등의 argument에서 여러 종목을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
 ⚠️ 수행하고자 하는 분석 방식에 맞는 arguments들을 사용해주세요.
 ```bash
 python main.py --analysis <분석 방법> --tickers <종목 코드> --save_dir <저장 위치> # 그 외 분석에 필요한 arguments
@@ -49,7 +49,7 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 <img src="./output/avg_return_volatility/SCHD-QQQ-TLT-downward_only.png" alt="ETF Graph" width="500">
 
 ## 2. Long-term Investment Effect
-- 각 종목 별로 장기 투자 기간에 따라 수익률 분포의 변동을 계산
+- 각 종목 별로 장기 투자 기간에 따라 연평균 수익률 분포의 변동을 계산
 - `--analysis long_term_investment`
 - `--tickers`에는 반드시 1개의 종목만 입력
 - 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
@@ -64,8 +64,8 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 
 ### Example
 ```bash
-python main.py --analysis "long_term_investment" --tickers "QQQ5IEF5" --abbrs "S Q T" --save_dir "./output"
+python main.py --analysis "long_term_investment" --tickers "QQQ5IEF5" --save_dir "./output"
 ```
 
 ### Output
-<img src="./output/long_term_investment/QQQ5-IEF5.png" alt="ETF Graph" width="500">
+<img src="./output/long_term_investment/QQQ.png" alt="ETF Graph" width="500">
