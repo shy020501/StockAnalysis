@@ -63,8 +63,8 @@ if __name__ == "__main__":
                 
                 for ratio in ratios:
                     weighted_return, combined_ticker = get_mixed_data(stock_comb, ratio, abbr_comb)
-                    _, avg_return = get_annual_return(weighted_return)
-                    _, avg_volatility = get_annual_volatility(weighted_return, args.downward_only)
+                    avg_return = get_annual_return(weighted_return)
+                    avg_volatility = get_annual_volatility(weighted_return, args.downward_only)
                     
                     analysed_info[combined_ticker] = (avg_return, avg_volatility)
         else:
@@ -73,8 +73,8 @@ if __name__ == "__main__":
                     
         for i in range(len(args.tickers)):
             daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
-            _, avg_return = get_annual_return(daily_return)
-            _, avg_volatility = get_annual_volatility(daily_return, True)
+            avg_return = get_annual_return(daily_return)
+            avg_volatility = get_annual_volatility(daily_return, True)
             analysed_info[args.tickers[i]] = (avg_return, avg_volatility)
                 
         color_map = assign_color(list(set([simplify_ticker(ticker) for ticker in analysed_info.keys()])))

@@ -26,8 +26,11 @@ def get_annual_return(daily_returns: pd.DataFrame) -> tuple[pd.DataFrame, float]
 
     # DataFrame 변환
     result_df = pd.DataFrame(annual_data.items(), columns=['Year', 'Return']).dropna()
+    
+    total_return = np.prod(1 + result_df['Return']) - 1
+    num_years = len(result_df)
 
-    return result_df, result_df['Return'].mean()
+    return result_df['Return'].mean()
 
 def get_annual_volatility(daily_returns: pd.DataFrame, downward_only: bool = True) -> tuple[pd.DataFrame, float]:
     """
@@ -57,7 +60,7 @@ def get_annual_volatility(daily_returns: pd.DataFrame, downward_only: bool = Tru
     # DataFrame 변환
     result_df = pd.DataFrame(volatility_data.items(), columns=['Year', 'Volatility']).dropna()
 
-    return result_df, result_df['Volatility'].mean()
+    return result_df['Volatility'].mean()
 
 def get_mixed_data(stock_info: list[pd.DataFrame], ratio: list[float], abbrs: list[str] = None) -> tuple[pd.DataFrame, str]:
     """
