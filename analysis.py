@@ -46,11 +46,10 @@ def get_annual_volatility(daily_returns: pd.DataFrame, downward_only: bool = Tru
         # downward_only일 경우, 하락 구간(음수 수익률)만 선택
         selected_returns = yearly_returns[yearly_returns < 0] if downward_only else yearly_returns
         
-        # σ_annual = σ_daily × √거래일
-        volatility = selected_returns.std() * np.sqrt(len(selected_returns)) if not selected_returns.empty else np.nan
+        # σ_annual = σ_daily × √252 => 252는 연간 거래일 수 
+        volatility = selected_returns.std() * np.sqrt(252) if not selected_returns.empty else np.nan
         volatility_data[year] = volatility
 
-    # DataFrame 변환
     result_df = pd.DataFrame(volatility_data.items(), columns=['Year', 'Volatility']).dropna()
 
     return result_df['Volatility'].mean()
