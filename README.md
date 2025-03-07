@@ -71,7 +71,7 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 
 ### Example
 ```bash
-python main.py --analysis "long_term_investment" --tickers "QQQ5IEF5" --save_dir "./output"
+python main.py --analysis "long_term_investment" --tickers "QQQ" --save_dir "./output"
 ```
 
 ### Output
