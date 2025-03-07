@@ -9,19 +9,25 @@ pip install -r requirements.txt
 ```
 
 # Run Analysis
-⚠️ Tickers, abbrs 등의 argument에서 여러 종목을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
-⚠️ 수행하고자 하는 분석 방식에 맞는 arguments들을 사용해주세요.
+⚠️ Argument에서 `띄어쓰기`가 포함된 내용을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
+⚠️ 수행하고자 하는 분석 방식에 맞는 arguments들을 사용해주세요.<br>
+⚠️ `--ticker`에는 각 분석 방식에 맞는 형식으로 종목코드를 입력해주세요.
+
+### Arguments
+
+| Name             | Type        | Explanation                                        | Required       | Example                        |
+|------------------|-------------|----------------------------------------------------|----------------|--------------------------------|
+| `--analysis`     | `str`       | 사용할 분석 방식 (가능한 분석은 아래 참고)            | True           | `avg_return_volatility`        |
+| `--tickers`      | `str`       | 분석할 종목 코드(들)                                 | True          | `"SCHD QQQ TLT"`, `"SCHD8QQQ2"` |
+| `--save_dir`     | `str`       | 저장할 디렉토리 (default: output)                    | False          | `./output`                    |
+
+<br>
+
 ```bash
 python main.py --analysis <분석 방법> --tickers <종목 코드> --save_dir <저장 위치> # 그 외 분석에 필요한 arguments
 ```
 
-## Arguments
-
-| Name             | Type        | Explanation                                        | Required       | Example                        |
-|------------------|-------------|----------------------------------------------------|----------------|--------------------------------|
-| `--analysis`     | `str`       | 사용할 분석 방식 ("Analysis methods" 참고)           | True           | `avg_return_volatility`        |
-| `--tickers`      | `str`       | 분석할 종목 코드(들) ("Analysis methods" 참고)       | True          | `"SCHD QQQ TLT"`, `"SCHD8QQQ2"` |
-| `--save_dir`     | `str`       | 저장할 디렉토리 (default: output)                    | False          | `./output`                    |
+<br>
 
 # Analysis Methods
 
@@ -48,11 +54,12 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 ### Output
 <img src="./output/avg_return_volatility/SCHD-QQQ-TLT-downward_only.png" alt="ETF Graph" width="500">
 
+<br>
+
 ## 2. Long-term Investment Effect
 - 각 종목 별로 장기 투자 기간에 따라 연평균 수익률 분포의 변동을 계산
 - `--analysis long_term_investment`
-- `--tickers`에는 반드시 1개의 종목만 입력
-- 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
+- `--tickers`에는 반드시 1개의 종목만 입력. 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
 
 ### Arguments
 | Name             | Type        | Explanation                                                  | Required       | Example                 |
