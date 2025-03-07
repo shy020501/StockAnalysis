@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def get_annual_return(daily_returns: pd.DataFrame) -> tuple[pd.DataFrame, float]:
     """
-    일 별 수익률을 받아, 연간 수익률 반환
+    일 별 수익률을 받아, 연 평균 수익률 반환
     
     Args:
         daily_return (pd.DataFrame): 일 별 수익률
@@ -15,22 +15,15 @@ def get_annual_return(daily_returns: pd.DataFrame) -> tuple[pd.DataFrame, float]
     returns = daily_returns.iloc[:, 0]
     index_dates = daily_returns.index
     
-    annual_data = {}
+    total_return = np.prod(1 + returns) - 1
 
-    for year in sorted(index_dates.year.unique()):
-        yearly_returns = returns[index_dates.year == year] # 연도 별로 계산
-
-        # 연간 수익률 = ∏(1 + r_daily) - 1
-        annual_return = np.prod(1 + yearly_returns) - 1  
-        annual_data[year] = annual_return
-
-    # DataFrame 변환
-    result_df = pd.DataFrame(annual_data.items(), columns=['Year', 'Return']).dropna()
+    start_year = index_dates.min().year
+    end_year = index_dates.max().year
+    num_years = end_year - start_year + 1
     
-    total_return = np.prod(1 + result_df['Return']) - 1
-    num_years = len(result_df)
+    annualized_return = (1 + total_return) ** (1 / num_years) - 1
 
-    return result_df['Return'].mean()
+    return annualized_return
 
 def get_annual_volatility(daily_returns: pd.DataFrame, downward_only: bool = True) -> tuple[pd.DataFrame, float]:
     """
@@ -113,7 +106,7 @@ def get_multiple_stock_info(tickers: list[str]) -> list[pd.DataFrame]:
 def sample_random_returns(daily_return: pd.DataFrame, invest_year: int, sample_num: int) -> list[float]:
     """
     주어진 일일 수익률 데이터에서 invest_year년 동안의 구간을 무작위로 sample_num개 샘플링하여,
-    각 구간에서 invest_year년 동안 일적립식 투자를 하였을 때 총 수익률을 계산 후 반환
+    각 구간에서 invest_year년 동안 일적립식 투자를 하였을 때 연 평균 수익률을 계산 후 반환
     
     Args:
         daily_return (pd.DataFrame): 주식/포트폴리오의 일일 수익률
@@ -143,7 +136,8 @@ def sample_random_returns(daily_return: pd.DataFrame, invest_year: int, sample_n
         actual_end_date = future_dates[0]
         invest_period = daily_return.loc[start_date:actual_end_date]
         
-        cumulative_return = (1 + invest_period).cumprod().iloc[-1] - 1
-        sampled_returns.append(float(cumulative_return.iloc[0]) * 100)
+        cumulative_earning = (1 + invest_period).cumprod().iloc[-1]
+        annualized_return = float(cumulative_earning.iloc[0]) ** (1 / invest_year) - 1
+        sampled_returns.append(annualized_return * 100)
     
     return sampled_returns
