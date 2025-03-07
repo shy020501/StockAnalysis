@@ -143,6 +143,8 @@ if __name__ == "__main__":
         else:
             file_name = ticker
             
+        bin = None
+            
         fig, axes = plt.subplots(nrows=len(invest_years), figsize=(10, len(invest_years) * 5))  # 개수만큼 세로 배치
 
         plt.rc('font', family='Malgun Gothic')
@@ -150,10 +152,11 @@ if __name__ == "__main__":
         
         fig.suptitle(f"Long-Term Investment of {file_name} ({start_date} ~ {end_date})", fontsize=16, fontweight='bold')
         
-        for ax, invest_year in zip(axes, invest_years):
+        for i, (ax, invest_year) in enumerate(zip(axes, invest_years)):
             sampled_returns = sample_random_returns(daily_return, invest_year, args.num_samples)
             
-            bins = np.arange(min(sampled_returns) // 5 * 5, max(sampled_returns) // 5 * 5 + 6, 5) # 5% 단위로 수익률 계산
+            if i == 0:
+                bins = np.arange(min(sampled_returns) // 5 * 5, max(sampled_returns) // 5 * 5 + 6, 5) # 5% 단위로 수익률 계산
 
             counts, edges = np.histogram(sampled_returns, bins=bins)
 
