@@ -2,6 +2,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from utils import remove_first_last_year
 
 def get_annual_return(daily_returns: pd.DataFrame) -> tuple[pd.DataFrame, float]:
     """
@@ -11,6 +12,8 @@ def get_annual_return(daily_returns: pd.DataFrame) -> tuple[pd.DataFrame, float]
         daily_return (pd.DataFrame): 일 별 수익률
     """
     assert daily_returns.shape[1] == 1, "DataFrame에는 하나의 컬럼(수익률)만 존재해야 합니다."
+    
+    daily_returns = remove_first_last_year(daily_returns)
     
     returns = daily_returns.iloc[:, 0]
     index_dates = daily_returns.index
@@ -34,6 +37,8 @@ def get_annual_volatility(daily_returns: pd.DataFrame, downward_only: bool = Tru
         downward_only (bool): 하락 구간만 계산할지 여부
     """
     assert daily_returns.shape[1] == 1, "DataFrame에는 하나의 컬럼(수익률)만 존재해야 합니다."
+    
+    daily_returns = remove_first_last_year(daily_returns)
     
     returns = daily_returns.iloc[:, 0]
     index_dates = daily_returns.index
