@@ -65,3 +65,21 @@ def parse_string_digit_pairs(s: str):
     parsed_result = [(text, float(num) / 10 if num else None) for text, num in matches]
     
     return parsed_result
+
+def remove_first_last_year(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    주어진 DataFrame에서 첫 연도와 마지막 연도를 제거
+
+    Args:
+        df (pd.DataFrame): 수정할 DataFrame (DatetimeIndex가 설정된 DataFrame)
+    """
+    assert isinstance(df.index, pd.DatetimeIndex), "DataFrame의 index는 DatetimeIndex여야 합니다."
+    
+    df = df.sort_index()
+
+    first_year = df.index[0].year  # 가장 첫 연도
+    last_year = df.index[-1].year  # 가장 마지막 연도
+
+    filtered_returns = df[(df.index.year != first_year) & (df.index.year != last_year)]
+
+    return filtered_returns
