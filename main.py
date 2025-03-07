@@ -69,6 +69,10 @@ if __name__ == "__main__":
                     analysed_info[combined_ticker] = (avg_return, avg_volatility)
         else:
             stock_info = [yf.download(args.tickers[0], period="max", interval="1d", auto_adjust=False)]
+            
+        # get_annual_return()와 get_annual_volatility()에서 첫 & 마지막 연도 제거할 것을 고려하여 설정
+        start_year = stock_info[0].index.min().year + 1
+        end_year = stock_info[0].index.max().year - 1
                     
         for i in range(len(args.tickers)):
             daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
@@ -89,7 +93,7 @@ if __name__ == "__main__":
         abbr_text = "\n".join([f"{abbr}: {ticker}" for abbr, ticker in zip(args.abbrs, args.tickers)])
         plt.text(1.02, 0.5, abbr_text, transform=plt.gca().transAxes, fontsize=10, verticalalignment='center', bbox=dict(facecolor='white', alpha=0.5))
 
-        x_label = "Downside Volatility (%)" if args.downward_only else "Volatility (%)"
+        x_label = "Downside Volatility" if args.downward_only else "Volatility"
         file_name = "-".join([ticker for ticker in args.tickers])
         
         if args.downward_only:
@@ -98,9 +102,9 @@ if __name__ == "__main__":
             file_name += "-must_include-"
             file_name += "-".join([ticker for ticker in args.must_include])
         
-        plt.xlabel(x_label)
+        plt.xlabel(f"{x_label} (%)")
         plt.ylabel("Average Annual Return (%)")
-        plt.title(f"Start date : {latest_start_date}")
+        plt.title(f"Average Return & {x_label} ({start_year} ~ {end_year})")
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.savefig(f"{save_dir}/{file_name}.png")
 
@@ -119,22 +123,32 @@ if __name__ == "__main__":
             tickers = list(tickers)
             ratios = list(ratios)
             
-            stock_info, latest_start_date = get_multiple_stock_info(tickers)
+            stock_info = get_multiple_stock_info(tickers)
             daily_return, _ = get_mixed_data(stock_info, ratios, None)
         else:
             ticker = portfolio[0][0]
             df = yf.download(ticker, period="max", interval="1d", auto_adjust=False)
             daily_return = df['Adj Close'].pct_change().dropna()
-            latest_start_date = df.index.min().date()
+            
+        start_date = str(daily_return.index.min().date())
+        end_date = str(daily_return.index.max().date())
             
         invest_years = list(range(args.min_year, args.max_year+1, args.interval))
         if invest_years[-1] != args.max_year:
             invest_years.append(args.max_year)
             
+        if len(portfolio) > 1:
+            rounded_ratios = [round(r * 10) for r in ratios]
+            file_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
+        else:
+            file_name = ticker
+            
         fig, axes = plt.subplots(nrows=len(invest_years), figsize=(10, len(invest_years) * 5))  # 개수만큼 세로 배치
 
         plt.rc('font', family='Malgun Gothic')
         plt.rcParams['axes.unicode_minus'] = False
+        
+        fig.suptitle(f"Long-Term Investment of {file_name} ({start_date} ~ {end_date})", fontsize=16, fontweight='bold')
         
         for ax, invest_year in zip(axes, invest_years):
             sampled_returns = sample_random_returns(daily_return, invest_year, args.num_samples)
@@ -147,17 +161,11 @@ if __name__ == "__main__":
             counts, edges = np.histogram(sampled_returns, bins=bins)
 
             ax.bar(edges[:-1], counts, width=5, edgecolor="black", align="edge")
-            ax.set_xlabel("Cumulative Return (%)")
-            ax.set_ylabel("Num samples")
-            ax.set_title(f"Cumulative return of {invest_year}-year investment")
+            ax.set_xlabel("Average Annual Return (%)")
+            ax.set_ylabel("Num Samples")
+            ax.set_title(f"Average annual of {invest_year}-year investment")
             ax.set_xticks(edges)
             ax.grid(axis="y", linestyle="--", alpha=0.7)
-        
-        if len(portfolio) > 1:
-            rounded_ratios = [round(r * 10) for r in ratios]
-            file_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
-        else:
-            file_name = ticker
             
         plt.tight_layout()
         plt.savefig(f"{save_dir}/{file_name}.png")
