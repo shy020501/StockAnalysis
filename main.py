@@ -164,5 +164,5 @@ if __name__ == "__main__":
             ax.set_xticks(edges)
             ax.grid(axis="y", linestyle="--", alpha=0.7)
             
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # suptitle이 잘리지 않도록 여백 확보
         plt.savefig(f"{save_dir}/{file_name}.png")
