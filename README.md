@@ -52,7 +52,7 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 ```
 
 ### Output
-<img src="./output/avg_return_volatility/SCHD-QQQ-TLT-downward_only.png" alt="ETF Graph" width="500">
+<img src="./output/avg_return_volatility/SCHD-QQQ-TLT-downward_only.png" alt="Avg Return Volatility Graph" width="500">
 
 <br>
 
@@ -75,4 +75,26 @@ python main.py --analysis "long_term_investment" --tickers "QQQ" --save_path "./
 ```
 
 ### Output
-<img src="./output/long_term_investment/QQQ.png" alt="ETF Graph" width="500">
+<img src="./output/long_term_investment/QQQ.png" alt="Long_term Investment Graph" width="500">
+
+<br>
+
+## 3. Cummulative Return
+- 각 종목 혹은 포트폴리오에 따른 누적 수익률 계산
+- `--analysis cummulative_return`
+- `--tickers`에는 반드시 1개의 종목만 입력. 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
+
+### Arguments
+| Name             | Type        | Explanation                                                  | Required       | Example                 |
+|------------------|-------------|--------------------------------------------------------------|----------------|-------------------------|
+| `--start_year`   | `int`       | 시작 연도. 미 입력시 최대치로 설정. (default: None)            | False          | `2012"`                |
+
+### Example
+```bash
+python main.py --analysis "cummulative_return" --tickers "QQQ5IEF5" --start_year 2012 --save_path "./output"
+```
+
+### Output
+<img src="./output/cummulative_return/QQQ5-IEF5-from_2012.png" alt="Cummulative Return Graph" width="500">
+
+<br>
