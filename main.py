@@ -6,7 +6,7 @@ import yfinance as yf
 from analysis import *
 from utils import *
 
-AVAIL_ANALYSIS = ["avg_return_volatility", "long_term_investment"]
+AVAIL_ANALYSIS = ["avg_return_volatility", "long_term_investment", "cummulative_return"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ETF Analysis Script")
@@ -29,6 +29,9 @@ if __name__ == "__main__":
     parser.add_argument("--max_year", type=int, default=10, help="Maximum years of investment")
     parser.add_argument("--interval", type=int, default=2, help="Interval of years to investigate effect of long-term investment")
     parser.add_argument("--num_samples", type=int, default=500, help="Number of samples")
+    
+    # cummulative_return 전용
+    parser.add_argument("--start_year", type=int, default=None, help="Starting year to measure cummulative return")
     
     args = parser.parse_args()
     
@@ -168,4 +171,76 @@ if __name__ == "__main__":
             ax.grid(axis="y", linestyle="--", alpha=0.7)
             
         plt.tight_layout(rect=[0, 0, 1, 0.96])  # suptitle이 잘리지 않도록 여백 확보
+        plt.savefig(f"{save_dir}/{file_name}.png")
+        
+    if args.analysis == "cummulative_return":
+        assert len(args.tickers) == 1, "여러 종목으로 이루어진 포트폴리오에 대한 수익률을 원하는 경우는 README를 참고하여 하나의 string으로 작성 바랍니다."
+        
+        save_dir = f"{args.save_path}/cummulative_return/"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            
+        portfolio = parse_string_digit_pairs(args.tickers[0])
+        cumulative_returns = []
+        labels = []
+        
+        if len(portfolio) > 1:
+            tickers, ratios = zip(*portfolio)
+            
+            tickers = list(tickers)
+            ratios = list(ratios)
+            
+            rounded_ratios = [round(r * 10) for r in ratios]
+            file_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
+            
+            stock_info = get_multiple_stock_info(tickers)
+            
+            if args.start_year is not None:
+                start_datetime = pd.to_datetime(f"{args.start_year}-01-01")
+                for i in range(len(stock_info)):
+                    stock_info[i] = stock_info[i][stock_info[i].index >= start_datetime]
+                file_name += f"-from_{args.start_year}"
+            
+            for i, info in enumerate(stock_info):
+                daily_return = info['Adj Close'].pct_change().dropna()
+                cumulative_return = (1 + daily_return).cumprod() - 1
+                cumulative_returns.append(cumulative_return * 100)
+                labels.append(tickers[i])
+            
+            daily_return, _ = get_mixed_data(stock_info, ratios, None)
+            cumulative_return = (1 + daily_return).cumprod() - 1
+            cumulative_returns.append(cumulative_return * 100)
+            labels.append(file_name)
+        else:
+            ticker = portfolio[0][0]
+            df = yf.download(ticker, period="max", interval="1d", auto_adjust=False)
+            
+            file_name = ticker
+            
+            if args.start_year is not None:
+                start_datetime = pd.to_datetime(f"{args.start_year}-01-01")
+                df = df[df.index >= start_datetime]
+                file_name += f"-from_{args.start_year}"
+            
+            daily_return = df['Adj Close'].pct_change().dropna()
+            cumulative_return = (1 + daily_return).cumprod() - 1
+            cumulative_returns.append(cumulative_return * 100)
+            labels.append(ticker)
+            
+        color_map = assign_color(labels)
+        start_date = str(cumulative_returns[0].index.min().date())
+        end_date = str(cumulative_returns[0].index.max().date())
+            
+        plt.figure(figsize=(12, 6))
+
+        for i, cumulative_return in enumerate(cumulative_returns):
+            plt.plot(cumulative_return.index, cumulative_return, label=labels[i], color=color_map[labels[i]])
+
+        plt.axhline(y=0, color='black', linestyle='--', linewidth=0.8)
+        plt.title(f"Cumulative Return ({start_date} ~ {end_date})")
+        plt.xlabel("Time (Year)")
+        plt.ylabel("Cumulative Return (%)")
+        plt.legend()
+        plt.grid(True)
+
         plt.savefig(f"{save_dir}/{file_name}.png")
