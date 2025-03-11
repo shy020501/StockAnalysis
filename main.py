@@ -2,11 +2,14 @@ import os
 import numpy as np
 import argparse
 import yfinance as yf
+from matplotlib.patches import Patch
+import matplotlib.ticker as mticker
+from matplotlib.ticker import MultipleLocator
 
 from analysis import *
 from utils import *
 
-AVAIL_ANALYSIS = ["avg_return_volatility", "long_term_investment", "cummulative_return"]
+AVAIL_ANALYSIS = ["avg_return_volatility", "compare_avg_return_volatility", "long_term_investment", "cummulative_return"]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ETF Analysis Script")
@@ -17,7 +20,7 @@ if __name__ == "__main__":
                         help="Whitespace-separated list of ETF tickers (default: SCHD SPY QQQ)")
     parser.add_argument("--save_path", type=str, default="./output", help="Directory to save results")
     
-    # avg_return_volatility 전용
+    # avg_return_volatility & single_avg_return_volatility 전용
     parser.add_argument("--downward_only", action="store_true", help="Get downward value only (default: False)")
     parser.add_argument("--abbrs", type=lambda s: s.split(' '), default=None,
                         help="Whitespace-separated list of abbreviation of ETF tickers (default: S P Q)")
@@ -110,6 +113,93 @@ if __name__ == "__main__":
         plt.ylabel("Average Annual Return (%)")
         plt.title(f"Average Return & {x_label} ({start_year} ~ {end_year})")
         plt.grid(True, linestyle='--', alpha=0.7)
+        plt.savefig(f"{save_dir}/{file_name}.png")
+    
+    if args.analysis == "compare_avg_return_volatility":
+        save_dir = f"{args.save_path}/compare_avg_return_volatility/"
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            
+        analysed_info = {}
+        valid_years = {}
+        
+        single_ticker_info = {}
+        
+        for portfolio_str in args.tickers:
+            portfolio = parse_string_digit_pairs(portfolio_str)
+            
+            if len(portfolio) > 1:
+                tickers, ratios = zip(*portfolio)
+                
+                tickers = list(tickers)
+                ratios = list(ratios)
+                
+                stock_info = get_multiple_stock_info(tickers)
+                daily_return, _ = get_mixed_data(stock_info, ratios, None)
+                
+                avg_return = get_annual_return(daily_return)
+                avg_volatility = get_annual_volatility(daily_return, args.downward_only)
+                
+                for i in range(len(stock_info)):
+                    single_ticker = stock_info[i].columns.get_level_values('Ticker').unique()[0]
+                    if single_ticker not in single_ticker_info:
+                        daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
+                        
+                        single_avg_return = get_annual_return(daily_return)
+                        single_avg_volatility = get_annual_volatility(daily_return, args.downward_only)
+                        
+                        single_ticker_info[single_ticker] = (single_avg_return, single_avg_volatility)
+            else:
+                ticker = portfolio[0][0]
+                df = yf.download(ticker, period="max", interval="1d", auto_adjust=False)
+                daily_return = df['Adj Close'].pct_change().dropna()
+                
+                avg_return = get_annual_return(daily_return)
+                avg_volatility = get_annual_volatility(daily_return, args.downward_only)
+                
+            start_year = daily_return.index.min().year + 1
+            end_year = daily_return.index.max().year - 1
+            
+            if len(portfolio) > 1:
+                rounded_ratios = [round(r * 10) for r in ratios]
+                portfolio_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
+            else:
+                portfolio_name = ticker
+                
+            analysed_info[portfolio_name] = (avg_return, avg_volatility)
+            valid_years[portfolio_name] = (start_year, end_year)
+            
+        color_map = assign_color(list(analysed_info.keys()) + list(single_ticker_info.keys()))
+        
+        plt.figure(figsize=(10, 6))
+        
+        legend_handles = []
+        
+        for portfolio_name, (avg_return, avg_volatility) in analysed_info.items():
+            color = color_map[portfolio_name]
+            plt.scatter(avg_volatility * 100, avg_return * 100, s=500, color=color, alpha=0.6, edgecolors='black')
+            
+            start_year, end_year = valid_years[portfolio_name]
+            legend_label = f"{portfolio_name} ({start_year} ~ {end_year})"
+            legend_handles.append(Patch(facecolor=color, edgecolor='black', label=legend_label))
+            
+        for ticker_name, (avg_return, avg_volatility) in single_ticker_info.items():
+            color = color_map[ticker_name]
+            
+            plt.scatter(avg_volatility * 100, avg_return * 100, s=500, color=color, alpha=0.6, edgecolors='black')
+            plt.text(avg_volatility * 100, avg_return * 100, ticker_name, fontsize=8, ha='center', va='center', fontweight='bold')
+
+        file_name = "-".join([ticker for ticker in args.tickers])
+        if args.downward_only:
+            file_name += "-downward_only"
+            
+        x_label = "Downside Volatility" if args.downward_only else "Volatility"
+        
+        plt.xlabel(f"{x_label} (%)")
+        plt.ylabel("Average Annual Return (%)")
+        plt.title(f"Average Return & {x_label}")
+        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.legend(handles=legend_handles, title="Portfolios",loc='lower right', bbox_to_anchor=(0.98, 0.02), fontsize=10)
         plt.savefig(f"{save_dir}/{file_name}.png")
 
     if args.analysis == "long_term_investment":
