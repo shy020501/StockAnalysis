@@ -56,7 +56,29 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 
 <br>
 
-## 2. Long-term Investment Effect
+## 2. Compare average return and volatility (Annual)
+- 여러 포트폴리오 별 연평균 수익률과 연평균 변동률에 대해 비교
+- `--analysis compare_avg_return_volatility`
+- `--tickers`에는 여러 포트폴리오들을 `띄어쓰기`로 구분하여 입력. 포트폴리오는 `{ticker}{ratio}`형태로 비율을 맞춰 작성 </br>
+(e.g. `--tickers "QQQ5IEF5 QQQ4IEF3GLD3"`)
+- 하락 변동성만 확인하고 싶을 때는 `--downward_only` 사용
+
+### Arguments
+| Name             | Type        | Explanation                                                  | Required       | Example                 |
+|------------------|-------------|--------------------------------------------------------------|----------------|-------------------------|
+| `--downward_only`| `bool`      | 하락 변동률만 계산할지 여부 (default: False)                   | False          | `--downward_only`       |
+
+### Example
+```bash
+python main.py --analysis "compare_avg_return_volatility" --tickers "QQQ5IEF5 QQQ3IEF4GLD3 QQQ4IEF3GLD3 QQQ3IEF3GLD4 QQQ4IEF2GLD4 QQQ5GLD5" --downward_only --save_path "./output"
+```
+
+### Output
+<img src="./output/compare_avg_return_volatility/QQQ5IEF5-QQQ3IEF4GLD3-QQQ4IEF3GLD3-QQQ3IEF3GLD4-QQQ4IEF2GLD4-QQQ5GLD5-downward_only.png" alt="Compare Avg Return Volatility Graph" width="500">
+
+<br>
+
+## 3. Long-term Investment Effect
 - 각 종목 별로 장기 투자 기간에 따라 연평균 수익률 분포의 변동을 계산
 - `--analysis long_term_investment`
 - `--tickers`에는 반드시 1개의 종목만 입력. 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
@@ -79,7 +101,7 @@ python main.py --analysis "long_term_investment" --tickers "QQQ" --save_path "./
 
 <br>
 
-## 3. Cummulative Return
+## 4. Cummulative Return
 - 각 종목 혹은 포트폴리오에 따른 누적 수익률 계산
 - `--analysis cummulative_return`
 - `--tickers`에는 반드시 1개의 종목만 입력. 특정 포트폴리오에 대해 분석하고자 한다면 종목명과 비율을 붙여서 입력 (e.g.`SCHD2QQQ3SPY5`)
