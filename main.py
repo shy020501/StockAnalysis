@@ -90,12 +90,12 @@ if __name__ == "__main__":
         color_map = assign_color(list(set([simplify_ticker(ticker) for ticker in analysed_info.keys()])))
 
         plt.figure(figsize=(10, 6))
-        for ticeker, (avg_return, avg_volatility) in analysed_info.items():
-            base = simplify_ticker(ticeker)
+        for ticker, (avg_return, avg_volatility) in analysed_info.items():
+            base = simplify_ticker(ticker)
             color = color_map[base] if base in color_map else "gray"
             
             plt.scatter(avg_volatility * 100, avg_return * 100, s=500, color=color, alpha=0.6, edgecolors='black')
-            plt.text(avg_volatility * 100, avg_return * 100, ticeker, fontsize=8, ha='center', va='center', fontweight='bold')
+            plt.text(avg_volatility * 100, avg_return * 100, ticker, fontsize=8, ha='center', va='center', fontweight='bold')
 
         abbr_text = "\n".join([f"{abbr}: {ticker}" for abbr, ticker in zip(args.abbrs, args.tickers)])
         plt.text(1.02, 0.5, abbr_text, transform=plt.gca().transAxes, fontsize=10, verticalalignment='center', bbox=dict(facecolor='white', alpha=0.5))
