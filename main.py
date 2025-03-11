@@ -80,7 +80,7 @@ if __name__ == "__main__":
         for i in range(len(args.tickers)):
             daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
             avg_return = get_annual_return(daily_return)
-            avg_volatility = get_annual_volatility(daily_return, True)
+            avg_volatility = get_annual_volatility(daily_return, args.downward_only)
             analysed_info[args.tickers[i]] = (avg_return, avg_volatility)
                 
         color_map = assign_color(list(set([simplify_ticker(ticker) for ticker in analysed_info.keys()])))
