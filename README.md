@@ -9,15 +9,16 @@ pip install -r requirements.txt
 ```
 
 # Run Analysis
-⚠️ Argument에서 `띄어쓰기`가 포함된 내용을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
+⚠️ 사용할 분석 방식(`--analysis`)은 <strong>Analysis Methods</strong>를 참고해주세요.<br>
 ⚠️ 수행하고자 하는 분석 방식에 맞는 arguments들을 사용해주세요.<br>
+⚠️ Argument에서 `띄어쓰기`가 포함된 내용을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
 ⚠️ `--ticker`에는 각 분석 방식에 맞는 형식으로 종목코드를 입력해주세요.
 
 ### Arguments
 
 | Name             | Type        | Explanation                                        | Required       | Example                        |
 |------------------|-------------|----------------------------------------------------|----------------|--------------------------------|
-| `--analysis`     | `str`       | 사용할 분석 방식 (가능한 분석은 아래 참고)            | True           | `avg_return_volatility`        |
+| `--analysis`     | `str`       | 사용할 분석 방식                                    | True           | `avg_return_volatility`        |
 | `--tickers`      | `str`       | 분석할 종목 코드(들)                                 | True          | `"SCHD QQQ TLT"`, `"SCHD8QQQ2"` |
 | `--save_path`    | `str`       | 저장할 디렉토리 (default: output)                    | False          | `./output`                    |
 
@@ -59,7 +60,7 @@ python main.py --analysis "avg_return_volatility" --tickers "SCHD QQQ TLT" --abb
 ## 2. Compare average return and volatility (Annual)
 - 여러 포트폴리오 별 연평균 수익률과 연평균 변동률에 대해 비교
 - `--analysis compare_avg_return_volatility`
-- `--tickers`에는 여러 포트폴리오들을 `띄어쓰기`로 구분하여 입력. 포트폴리오는 `{ticker}{ratio}`형태로 비율을 맞춰 작성 </br>
+- `--tickers`에는 여러 포트폴리오들을 `띄어쓰기`로 구분하여 입력. 포트폴리오는 `{ticker}{ratio}`형태로 비율을 맞춰 작성 <br>
 (e.g. `--tickers "QQQ5IEF5 QQQ4IEF3GLD3"`)
 - 하락 변동성만 확인하고 싶을 때는 `--downward_only` 사용
 
