@@ -35,7 +35,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    assert args.analysis in AVAIL_ANALYSIS, f"{args.analysis}은 가능한 분석 목록에 없습니다."
+    error_msg = f"{args.analysis}은 가능한 분석 목록에 없습니다."
+    assert args.analysis in AVAIL_ANALYSIS, error_msg
     
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
