@@ -1,14 +1,14 @@
 # StockAnalysis
 📊 Yahoo Finance 데이터 기반 주식/ETF 분석 및 시각화 스크립트
 
-# Installation
+## Installation
 ```bash
 conda create -n stock_analysis python=3.10
 conda activate stock_analysis
 pip install -r requirements.txt
 ```
 
-# Run Analysis
+## Run Analysis
 ⚠️ 사용할 분석 방식(`--analysis`)은 <strong>Analysis Methods</strong>를 참고해주세요.<br>
 ⚠️ 수행하고자 하는 분석 방식에 맞는 arguments들을 사용해주세요.<br>
 ⚠️ Argument에서 `띄어쓰기`가 포함된 내용을 입력할 시, 반드시 따옴표(" or ')로 감싸서 입력하세요.<br>
