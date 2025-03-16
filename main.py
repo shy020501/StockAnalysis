@@ -125,49 +125,54 @@ if __name__ == "__main__":
         
         single_ticker_info = {}
         
+        stock_info_dict = {}
+        
+        portfolio_list = []
+        ticker_list = []
+        
         for portfolio_str in args.tickers:
             portfolio = parse_string_digit_pairs(portfolio_str)
+            portfolio_list.append(portfolio)
             
             if len(portfolio) > 1:
+                ticker, _ = zip(*portfolio)
+            else:
+                ticker = portfolio[0][0]
+            ticker_list.extend(ticker)
+            
+        ticker_list = list(set(ticker_list))
+        stock_info = get_multiple_stock_info(ticker_list)
+        
+        start_year = stock_info[0].index.min().year + 1
+        end_year = stock_info[0].index.max().year - 1
+    
+        for ticker, stock_info in zip(ticker_list, stock_info):
+            stock_info_dict[ticker] = stock_info
+            
+            # 개별 종목에 대한 수익률 및 변동성 먼저 계산
+            daily_return = stock_info['Adj Close'].pct_change().dropna()
+                
+            avg_return = get_annual_return(daily_return)
+            avg_volatility = get_annual_volatility(daily_return, args.downward_only)
+            
+            single_ticker_info[ticker] = (avg_return, avg_volatility)
+            
+        for portfolio in portfolio_list:
+            if len(portfolio) > 1: # 개별 종목에 대한 수익률 및 변동성은 위에서 계산 됐기에 생략 가능
                 tickers, ratios = zip(*portfolio)
                 
                 tickers = list(tickers)
                 ratios = list(ratios)
                 
-                stock_info = get_multiple_stock_info(tickers)
+                stock_info = [stock_info_dict[ticker] for ticker in tickers]
                 daily_return, _ = get_mixed_data(stock_info, ratios, None)
                 
                 avg_return = get_annual_return(daily_return)
                 avg_volatility = get_annual_volatility(daily_return, args.downward_only)
                 
-                for i in range(len(stock_info)):
-                    single_ticker = stock_info[i].columns.get_level_values('Ticker').unique()[0]
-                    if single_ticker not in single_ticker_info:
-                        daily_return = stock_info[i]['Adj Close'].pct_change().dropna()
-                        
-                        single_avg_return = get_annual_return(daily_return)
-                        single_avg_volatility = get_annual_volatility(daily_return, args.downward_only)
-                        
-                        single_ticker_info[single_ticker] = (single_avg_return, single_avg_volatility)
-            else:
-                ticker = portfolio[0][0]
-                df = yf.download(ticker, period="max", interval="1d", auto_adjust=False)
-                daily_return = df['Adj Close'].pct_change().dropna()
-                
-                avg_return = get_annual_return(daily_return)
-                avg_volatility = get_annual_volatility(daily_return, args.downward_only)
-                
-            start_year = daily_return.index.min().year + 1
-            end_year = daily_return.index.max().year - 1
-            
-            if len(portfolio) > 1:
                 rounded_ratios = [round(r * 10) for r in ratios]
                 portfolio_name = "-".join(f"{ticker}{ratio}" for ticker, ratio in zip(tickers, rounded_ratios))
-            else:
-                portfolio_name = ticker
-                
-            analysed_info[portfolio_name] = (avg_return, avg_volatility)
-            valid_years[portfolio_name] = (start_year, end_year)
+                analysed_info[portfolio_name] = (avg_return, avg_volatility)
             
         color_map = assign_color(list(analysed_info.keys()) + list(single_ticker_info.keys()))
         
@@ -179,8 +184,7 @@ if __name__ == "__main__":
             color = color_map[portfolio_name]
             plt.scatter(avg_volatility * 100, avg_return * 100, s=500, color=color, alpha=0.6, edgecolors='black')
             
-            start_year, end_year = valid_years[portfolio_name]
-            legend_label = f"{portfolio_name} ({start_year} ~ {end_year})"
+            legend_label = f"{portfolio_name}"
             legend_handles.append(Patch(facecolor=color, edgecolor='black', label=legend_label))
             
         for ticker_name, (avg_return, avg_volatility) in single_ticker_info.items():
@@ -197,7 +201,7 @@ if __name__ == "__main__":
         
         plt.xlabel(f"{x_label} (%)")
         plt.ylabel("Average Annual Return (%)")
-        plt.title(f"Average Return & {x_label}")
+        plt.title(f"Average Return & {x_label} ({start_year} ~ {end_year})")
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.legend(handles=legend_handles, title="Portfolios",loc='lower right', bbox_to_anchor=(0.98, 0.02), fontsize=10)
         plt.savefig(f"{save_dir}/{file_name}.png")
