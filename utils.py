@@ -56,6 +56,9 @@ def parse_string_digit_pairs(s: str):
     Args:
         s (str): 패턴을 확인할 문자열
     """
+    if s and s[0].isdigit():
+        return [(s, None)]
+    
     pattern = r'^([A-Za-z]+(?:\d+[A-Za-z]+)*\d*)$'
     
     if not re.fullmatch(pattern, s):

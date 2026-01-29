@@ -138,7 +138,11 @@ if __name__ == "__main__":
                 ticker, _ = zip(*portfolio)
             else:
                 ticker = portfolio[0][0]
-            ticker_list.extend(ticker)
+                
+            if type(ticker) == str:
+                ticker_list.append(ticker)
+            else:
+                ticker_list.extend(ticker)
             
         ticker_list = list(set(ticker_list))
         stock_info = get_multiple_stock_info(ticker_list)
